@@ -1,0 +1,28 @@
+{
+  "name": "esfunctional",
+  "version": "1.0.0",
+  "description": "Next Generation EcmaScript Functional Helpers",
+  "main": "lib/v1/index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tarquas/esfunctional.git"
+  },
+  "keywords": [
+    "es6",
+    "js",
+    "functional",
+    "lodash"
+  ],
+  "author": "Taras Mykhailovych",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tarquas/esfunctional/issues"
+  },
+  "homepage": "https://github.com/tarquas/esfunctional#readme",
+  "dependencies": {
+    "lodash": "3.10.1"
+  }
+}
