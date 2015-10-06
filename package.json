@@ -1,6 +1,6 @@
 {
   "name": "esfunctional",
-  "version": "1.0.12",
+  "version": "1.1.0",
   "description": "Next Generation EcmaScript Functional Helpers",
   "main": "lib/v1/index.js",
   "scripts": {
