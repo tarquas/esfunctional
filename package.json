@@ -1,6 +1,6 @@
 {
   "name": "esfunctional",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Next Generation EcmaScript Functional Helpers",
   "main": "lib/v1/index.js",
   "scripts": {
@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/tarquas/esfunctional#readme",
   "dependencies": {
+    "chalk": "1.1.1",
     "lodash": "3.10.1"
   }
 }
