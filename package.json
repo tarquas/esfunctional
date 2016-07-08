@@ -1,10 +1,13 @@
 {
   "name": "esfunctional",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "description": "Next Generation EcmaScript Functional Helpers",
   "main": "lib/v1/index.js",
   "scripts": {
     "test": "npm test"
+  },
+  "engines": {
+    "node": ">=4.2.0"
   },
   "repository": {
     "type": "git",
@@ -12,9 +15,14 @@
   },
   "keywords": [
     "es6",
+    "esnext",
+    "node",
     "js",
+    "generator",
+    "promise",
     "functional",
-    "lodash"
+    "lodash",
+    "framework"
   ],
   "author": "Taras Mykhailovych",
   "license": "MIT",
@@ -24,6 +32,7 @@
   "homepage": "https://github.com/tarquas/esfunctional#readme",
   "dependencies": {
     "chalk": "1.1.3",
-    "lodash": "4.10.0"
+    "lodash": "4.13.1",
+    "pretty-error": "2.0.0"
   }
 }
