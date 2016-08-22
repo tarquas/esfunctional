@@ -1,10 +1,11 @@
 {
   "name": "esfunctional",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Next Generation EcmaScript Functional Helpers",
   "main": "lib/v1/index.js",
   "scripts": {
-    "test": "npm test"
+    "lint": "node lint --color",
+    "test": "node test --color"
   },
   "engines": {
     "node": ">=4.2.0"
