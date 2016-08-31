@@ -1,0 +1,10 @@
+{
+  "denied": {"code": 403, "message": "Access denied"},
+  "exists": {"code": 409, "message": "Resource already exists"},
+  "expiredoken": {"code": 401, "message": "Access token is expired"},
+  "internal": {"code": 500, "message": "Internal server error"},
+  "invalidToken": {"code": 401, "message": "Access token is invalid"},
+  "notFound": {"code": 404, "message": "Resource not found"},
+  "notImplemented": {"code": 504, "message": "Method not implemented"},
+  "unknown": {"code": 500, "message": "Unknown error"}
+}
