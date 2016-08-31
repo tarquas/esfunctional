@@ -6,6 +6,7 @@ let mongoose = require('mongoose');
 // in:
 S.alias = null;
 S.mongodb = null;
+S.connOptions = null;
 S.schema = null;
 
 // out:
@@ -29,7 +30,12 @@ S.modelInitializer = function*() {
 
 S.initializer = function*() {
   if (this.mongodb && !this.conn) {
-    yield new Promise((ok, nok) => this.conn = mongoose.createConnection(this.mongodb, oknok(ok, nok)));
+    yield new Promise((ok, nok) => this.conn = mongoose.createConnection(
+      this.mongodb,
+      this.connOptions || {},
+      oknok(ok, nok)
+    ));
+
     yield this.conn.db [promisify]('collections')();
     if (!this.alias) this.alias = this.conn.db.name;
     out.info(chalk.bold.yellow('Db'), chalk.green('Connected to Mongo:'), chalk.bold.cyan(this.alias));
