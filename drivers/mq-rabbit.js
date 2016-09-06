@@ -1,11 +1,11 @@
 'use strict';
-let S = require('esfunctional').inherit(module);
+const S = require('esfunctional').inherit(module);
 
-let Amqplib = require('amqplib');
-let uuid = require('node-uuid');
-let url = require('url');
+const Amqplib = require('amqplib');
+const uuid = require('node-uuid');
+const url = require('url');
 
-//in:
+// in:
 S.alias = null; // Alias
 S.rabbit = null; // AMQP link
 
@@ -23,59 +23,69 @@ S.instanceMinor = 0;
 
 S.init();
 
-S.initializer = function*() {
+S.initializer = function* initializer() {
   if (this.rabbit && !this.conn) {
     this.conn = yield Amqplib.connect(this.rabbit);
     if (!this.alias) this.alias = url.parse(this.rabbit).hostname;
-    out.info(chalk.bold.yellow('Mq'), chalk.green('Connected to Rabbit:'), chalk.bold.cyan(this.alias));
+
+    out.info(
+      chalk.bold.yellow('Mq'),
+      chalk.green('Connected to Rabbit:'),
+      chalk.bold.cyan(this.alias)
+    );
   }
 
   if (this.workers) yield* this.workers [by]('all')()();
 };
 
-S.finalizer = function*() {
+S.finalizer = function* finalizer() {
   if (this.conn) {
     this.conn.close();
     this.conn = null;
-    out.warn(chalk.bold.yellow('Mq'), chalk.yellow('Disconnected from Rabbit:'), chalk.bold.cyan(this.alias));
+
+    out.warn(
+      chalk.bold.yellow('Mq'),
+      chalk.yellow('Disconnected from Rabbit:'),
+      chalk.bold.cyan(this.alias)
+    );
   }
 };
 
-S.objToBuffer = function*(obj) {
-  let data = new Buffer(JSON.stringify(obj), 'utf8');
+S.objToBuffer = function* objToBuffer(obj) {
+  const data = new Buffer(JSON.stringify(obj), 'utf8');
   return data;
 };
 
-S.bufferToObj = function*(buffer) {
-  let decoded = JSON.parse(buffer.toString('utf8'));
+S.bufferToObj = function* bufferToObj(buffer) {
+  const decoded = JSON.parse(buffer.toString('utf8'));
   return decoded;
 };
 
-S.push = function*(id, payload) {
+S.push = function* push(id, payload) {
   yield* this.ok();
-  let ch = yield this.conn.createChannel();
+  const ch = yield this.conn.createChannel();
 
   try {
     yield ch.assertQueue(id, {durable: true});
-    let data = yield* S.objToBuffer(payload);
-    let sent = yield ch.sendToQueue(id, data, {deliveryMode: true});
+    const data = yield* S.objToBuffer(payload);
+    const sent = yield ch.sendToQueue(id, data, {deliveryMode: true});
     return sent;
   } finally {
     ch.close();
   }
 };
 
-S.worker = function(id, onData) {
-  let done = (function*() {
+S.worker = function worker(id, onData) {
+  const done = (function* workerDone() {
     yield* this.ok();
-    let ch = yield this.conn.createChannel();
+    const ch = yield this.conn.createChannel();
 
     yield ch.assertQueue(id, {durable: true});
     ch.prefetch(1);
 
-    yield ch.consume(id, (msg) => spawn(function*() {
+    yield ch.consume(id, (msg) => spawn(function* workerConsume() {
       if (!msg) return;
-      let decoded = yield* S.bufferToObj(msg.content);
+      const decoded = yield* S.bufferToObj(msg.content);
 
       try {
         yield* onData(decoded);
@@ -87,30 +97,36 @@ S.worker = function(id, onData) {
       ch.ack(msg);
     }), {noAck: false});
 
-    out.info(chalk.bold.yellow('Mq'), 'Registered', chalk.bold.cyan(id), 'worker on', chalk.cyan(this.alias));
+    out.info(
+      chalk.bold.yellow('Mq'),
+      'Registered',
+      chalk.bold.cyan(id),
+      'worker on',
+      chalk.cyan(this.alias)
+    );
   }).call(this) [pro]();
 
   if (!this.workers) this.workers = [];
   this.workers.push(done);
 };
 
-S.rpc = function*(id, payload) {
+S.rpc = function* rpc(id, payload) {
   yield* this.ok();
-  let ch = yield this.conn.createChannel();
-  let answer = Promise.defer();
+  const ch = yield this.conn.createChannel();
+  const answer = Promise.defer();
 
   try {
-    let corrId = uuid();
-    let qok = yield ch.assertQueue('', {exclusive: true});
-    let queue = qok.queue;
+    const corrId = uuid();
+    const qok = yield ch.assertQueue('', {exclusive: true});
+    const queue = qok.queue;
 
-    yield ch.consume(queue, (msg) => spawn(function*() {
+    yield ch.consume(queue, (msg) => spawn(function* rpcConsume() {
       if (msg.properties.correlationId === corrId) {
-        let decoded = yield* S.bufferToObj(msg.content);
+        const decoded = yield* S.bufferToObj(msg.content);
 
         if (decoded.error) {
           if (decoded.error.isError) {
-            let toThrow = new Error(decoded.error.message);
+            const toThrow = new Error(decoded.error.message);
             if (decoded.error.stack) toThrow.stack = decoded.error.stack;
             answer.reject(toThrow);
           } else answer.reject(decoded.error);
@@ -118,7 +134,7 @@ S.rpc = function*(id, payload) {
       }
     }));
 
-    let data = yield* S.objToBuffer(payload);
+    const data = yield* S.objToBuffer(payload);
     yield ch.sendToQueue(id, data, {correlationId: corrId, replyTo: queue});
     return yield answer.promise;
   } catch (err) {
@@ -128,31 +144,31 @@ S.rpc = function*(id, payload) {
   }
 };
 
-S.rpcWorker = function(id, onData) {
-  let done = (function*() {
+S.rpcWorker = function rpcWorker(id, onData) {
+  const done = (function* rpcWorkerDone() {
     yield* this.ok();
-    let ch = yield this.conn.createChannel();
+    const ch = yield this.conn.createChannel();
 
     yield ch.assertQueue(id, {durable: false});
     ch.prefetch(1);
 
-    yield ch.consume(id, (msg) => spawn(function*() {
+    yield ch.consume(id, (msg) => spawn(function* rpcWorkerConsume() {
       if (!msg) return;
-      let decoded = yield* S.bufferToObj(msg.content);
+      const decoded = yield* S.bufferToObj(msg.content);
       let response;
 
       try {
         response = {data: yield* onData(decoded)};
       } catch (err) {
         if (err instanceof Error) {
-          let encErr = {isError: true, message: err.message, stack: err.stack};
+          const encErr = {isError: true, message: err.message, stack: err.stack};
           response = {error: encErr};
         } else {
           response = {error: err};
         }
       }
 
-      let data = yield* S.objToBuffer(response);
+      const data = yield* S.objToBuffer(response);
 
       try {
         yield ch.sendToQueue(
@@ -161,12 +177,19 @@ S.rpcWorker = function(id, onData) {
           {correlationId: msg.properties.correlationId}
         );
       } catch (err) {
+        // err;
       }
 
       ch.ack(msg);
     }), {noAck: false});
 
-    out.info(chalk.bold.yellow('Mq'), 'Registered', chalk.bold.cyan(id), 'RPC worker on', chalk.cyan(this.alias));
+    out.info(
+      chalk.bold.yellow('Mq'),
+      'Registered',
+      chalk.bold.cyan(id),
+      'RPC worker on',
+      chalk.cyan(this.alias)
+    );
   }).call(this) [pro]();
 
   if (!this.workers) this.workers = [];

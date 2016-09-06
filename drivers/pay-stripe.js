@@ -1,7 +1,7 @@
 'use strict';
-let S = require('esfunctional').inherit(module);
+const S = require('esfunctional').inherit(module);
 
-let stripe = require('stripe');
+const stripe = require('stripe');
 
 // in:
 S.alias = null; // Alias
@@ -15,37 +15,47 @@ S.pubKey = null; // Public API key: pk_
 
 S.init();
 
-S.initializer = function*() {
+S.initializer = function* initializer() {
   if (this.key && !this.stripeCall) {
     this.stripeCall = stripe(this.key) [promisifyAll]();
     yield this.stripeCall('disputes', 'list')();
     if (!this.alias) this.alias = this.pubKey;
-    out.info(chalk.bold.yellow('Pay'), chalk.green('Connected to Stripe:'), chalk.bold.cyan(this.alias));
+
+    out.info(
+      chalk.bold.yellow('Pay'),
+      chalk.green('Connected to Stripe:'),
+      chalk.bold.cyan(this.alias)
+    );
   }
 };
 
-S.finalizer = function*() {
+S.finalizer = function* finalizer() {
   if (this.stripeCall) {
     this.stripeCall = null;
-    out.warn(chalk.bold.yellow('Pay'), chalk.yellow('Disconnected from Stripe:'), chalk.bold.cyan(this.alias));
+
+    out.warn(
+      chalk.bold.yellow('Pay'),
+      chalk.yellow('Disconnected from Stripe:'),
+      chalk.bold.cyan(this.alias)
+    );
   }
 };
 
-S.call = function() {
-  let _this = this;
-  let stripeMethod = this.stripeCall.apply(this, arguments);
+S.call = function call() {
+  const _this = this;
+  const stripeMethod = this.stripeCall.apply(this, arguments);
 
-  return function*() {
+  return function* callClosure() {
     yield* _this.ok();
     return yield stripeMethod.apply(this, arguments);
   };
 };
 
-S.webCall = function() {
-  let _this = this;
-  let stripeMethod = this.stripeCall.apply(this, arguments);
+S.webCall = function webCall() {
+  const _this = this;
+  const stripeMethod = this.stripeCall.apply(this, arguments);
 
-  return function*() {
+  return function* webCallClosure() {
     yield* _this.ok();
 
     try {

@@ -1,7 +1,7 @@
 'use strict';
-let S = require('esfunctional').inherit(module);
+const S = require('esfunctional').inherit(module);
 
-let mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 // in:
 S.alias = null;
@@ -16,6 +16,7 @@ S.schema = null;
 mongoose.Promise = global.Promise;
 
 S.Schema = mongoose.Schema;
+S.Types = mongoose.Types;
 
 S.errors = {
   duplicate: 11000
@@ -23,31 +24,43 @@ S.errors = {
 
 S.init();
 
-S.modelInitializer = function*() {
+S.modelInitializer = function* modelInitializer() {
   if (!this.schema.options.collection) throw new Error('Schema must have `collection` set');
   this.model = this.conn.model(this.schema.options.collection, this.schema);
 };
 
-S.initializer = function*() {
+S.initializer = function* initializer() {
   if (this.mongodb && !this.conn) {
-    yield new Promise((ok, nok) => this.conn = mongoose.createConnection(
-      this.mongodb,
-      this.connOptions || {},
-      oknok(ok, nok)
-    ));
+    yield new Promise((ok, nok) => {
+      this.conn = mongoose.createConnection(
+        this.mongodb,
+        this.connOptions || {},
+        oknok(ok, nok)
+      );
+    });
 
     yield this.conn.db [promisify]('collections')();
     if (!this.alias) this.alias = this.conn.db.name;
-    out.info(chalk.bold.yellow('Db'), chalk.green('Connected to Mongo:'), chalk.bold.cyan(this.alias));
+
+    out.info(
+      chalk.bold.yellow('Db'),
+      chalk.green('Connected to Mongo:'),
+      chalk.bold.cyan(this.alias)
+    );
   }
 
   if (this.schema) yield* this.modelInitializer();
 };
 
-S.finalizer = function*() {
+S.finalizer = function* finalizer() {
   if (this.conn) {
     this.conn.close();
     this.conn = null;
-    out.warn(chalk.bold.yellow('Db'), chalk.yellow('Disconnected from Mongo:'), chalk.bold.cyan(this.alias));
+
+    out.warn(
+      chalk.bold.yellow('Db'),
+      chalk.yellow('Disconnected from Mongo:'),
+      chalk.bold.cyan(this.alias)
+    );
   }
 };
