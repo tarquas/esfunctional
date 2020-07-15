@@ -33,7 +33,7 @@
   "homepage": "https://github.com/tarquas/esfunctional#readme",
   "dependencies": {
     "chalk": "3.0.0",
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "pretty-error": "2.1.1"
   }
 }
